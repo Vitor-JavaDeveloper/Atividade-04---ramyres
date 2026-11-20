@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: healthcare-deployment
+  labels:
+    app: healthcare
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: healthcare
+  template:
+    metadata:
+      labels:
+        app: healthcare
+    spec:
+      containers:
+        - name: healthcare-app
+          image: healthcare-app:latest
+          # Impede o Kubernetes de tentar baixar a imagem do Docker Hub (usa a imagem local do Minikube)
+          imagePullPolicy: Never
+          ports:
+            - containerPort: 8088
+          env:
+            - name: DB_URL
+              value: "jdbc:postgresql://banco-service:5432/healthcare"
+            - name: DB_USER
+              value: "healthcare"
+            - name: DB_PASS
+              value: "healthcare123"
+            - name: TZ
+              value: "America/Sao_Paulo"
+            # Ativa o fuso horário, limite de memória e o Agente OpenTelemetry
+            - name: JAVA_TOOL_OPTIONS
+              value: "-Duser.timezone=America/Sao_Paulo -Xmx512m -javaagent:/app/opentelemetry-javaagent.jar"
+            # Configurações do OpenTelemetry enviando traces para o OTel Collector
+            - name: OTEL_SERVICE_NAME
+              value: "healthcare-app"
+            - name: OTEL_EXPORTER_OTLP_ENDPOINT
+              value: "http://otel-collector:4318"
+            - name: OTEL_EXPORTER_OTLP_PROTOCOL
+              value: "http/protobuf"
+            - name: OTEL_METRICS_EXPORTER
+              value: "none"
+            - name: OTEL_LOGS_EXPORTER
+              value: "none"
+          resources:
+            requests:
+              memory: "384Mi"
+              cpu: "250m"
+            limits:
+              memory: "768Mi"
+              cpu: "500m"
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8088
+            initialDelaySeconds: 20
+            periodSeconds: 10

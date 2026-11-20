@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  arquivo de configuracao do maven.
+  aqui ficam as bibliotecas que o projeto usa e como ele e empacotado.
+  no final o maven gera um unico arquivo healthcare.jar que ja tem tudo dentro
+  (servidor web, api e as telas do front-end).
+  o banco de dados postgresql roda separado, num container do docker.
+-->
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <!-- usamos o spring boot como base, conforme a documentacao do projeto -->
+    <parent>
+        <groupId>org.springframework.boot</groupId>
+        <artifactId>spring-boot-starter-parent</artifactId>
+        <version>3.3.5</version>
+        <relativePath/>
+    </parent>
+
+    <groupId>br.senai</groupId>
+    <artifactId>healthcare</artifactId>
+    <version>1.0.0</version>
+    <name>HealthCare</name>
+    <description>Sistema de Controle de Triagem Hospitalar</description>
+
+    <properties>
+        <!-- java 17, que e o minimo pedido no ambiente de producao (item 7.2) -->
+        <java.version>17</java.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencies>
+        <!-- servidor web + api rest + conversao automatica para json -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-web</artifactId>
+        </dependency>
+
+        <!-- jpa: faz a ponte entre as classes java e as tabelas do banco (hibernate por baixo) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
+        <!-- driver do postgresql, o banco definido na documentacao (itens 3.10 e 7.2) -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+
+        <!-- so a parte de criptografia do spring security, para guardar as senhas com bcrypt (rnf01) -->
+        <dependency>
+            <groupId>org.springframework.security</groupId>
+            <artifactId>spring-security-crypto</artifactId>
+        </dependency>
+
+        <!-- biblioteca leve para gerar o pdf do relatorio (metodo exportarpdf do diagrama de classes) -->
+        <dependency>
+            <groupId>com.github.librepdf</groupId>
+            <artifactId>openpdf</artifactId>
+            <version>1.3.43</version>
+        </dependency>
+
+        <!-- somente para os testes automatizados (nao vai para o jar final) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <!-- nome fixo do arquivo gerado, assim o dockerfile sempre sabe onde ele esta -->
+        <finalName>healthcare</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
+</project>

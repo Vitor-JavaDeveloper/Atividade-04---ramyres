@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<!--
+  pagina unica do healthcare (front-end em html, css e javascript puro).
+  todas as telas estao aqui dentro, cada uma numa <section class="tela">.
+  o arquivo js/app.js mostra a tela certa e conversa com a api (/api/...).
+  o layout segue os mockups de alta fidelidade da documentacao (item 9.1).
+-->
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>HealthCare | Controle de Triagem Hospitalar</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+<!-- ===================== tela de login (rf06) ===================== -->
+<div id="telaLogin" class="login-fundo">
+  <form id="formLogin" class="login-card" novalidate>
+    <div class="logo-circulo">&#x2661;</div>
+    <h1>HealthCare</h1>
+    <p class="sub">Controle de Triagem Hospitalar</p>
+    <label>Usuário <input name="login" placeholder="Digite seu usuário" autocomplete="username" required></label>
+    <label>Senha <input name="senha" type="password" placeholder="••••••••" autocomplete="current-password" required></label>
+    <p id="erroLogin" class="msg-erro"></p>
+    <button class="btn primario largo">Entrar</button>
+    <p class="dica">Usuários de teste: admin, recepcao, enfermeiro, medico (senha: nome + 123)</p>
+  </form>
+</div>
+
+<!-- ===================== sistema (depois do login) ===================== -->
+<div id="sistema" class="layout" hidden>
+
+  <!-- menu lateral: os itens aparecem conforme o perfil do usuario -->
+  <aside class="lateral">
+    <div class="marca"><span class="logo-circulo pequeno">&#x2661;</span> HealthCare</div>
+    <nav id="menu"></nav>
+    <div class="usuario-box">
+      <b id="nomeUsuario"></b>
+      <small id="perfilUsuario"></small>
+      <button id="btnSair" class="btn-link">&#x21E5; Sair do Sistema</button>
+    </div>
+  </aside>
+
+  <main class="conteudo">
+    <div id="aviso" class="aviso" hidden></div>
+
+    <!-- ========== fila de atendimento (rf04, hu03, hu08) ========== -->
+    <section class="tela" id="tela-fila">
+      <div class="titulo-linha">
+        <div><h2>Fila de Atendimento</h2><p class="sub">Pacientes aguardando consulta médica, ordenados por gravidade e chegada.</p></div>
+        <button id="btnChamarProximo" class="btn primario" data-perfis="MEDICO">Chamar próximo paciente</button>
+      </div>
+
+      <!-- tempo medio de espera estimado por gravidade (hu08 e rnf03) -->
+      <div class="card">
+        <h3>Tempo médio de espera estimado <small id="infoMedicos"></small></h3>
+        <div id="temposGravidade" class="tempos"></div>
+      </div>
+
+      <div class="card sem-padding">
+        <table>
+          <thead><tr><th>#</th><th>Nome do Paciente</th><th>Classificação</th><th>Tempo Estimado</th><th>Esperando há</th><th>Situação</th><th class="direita">Ações</th></tr></thead>
+          <tbody id="tabelaFila"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== cadastro de paciente (rf01, hu01) ========== -->
+    <section class="tela" id="tela-cadastro-paciente">
+      <h2>Cadastro de Paciente</h2>
+      <p class="sub">Insira os dados pessoais para registrar um novo paciente no sistema.</p>
+      <form id="formPaciente" class="card grade" novalidate>
+        <label class="inteira">Nome Completo * <input name="nome" placeholder="Nome do paciente"><small class="erro"></small></label>
+        <label>CPF * <input name="cpf" placeholder="000.000.000-00" data-mascara="cpf"><small class="erro"></small></label>
+        <label>Data de Nascimento * <input name="dataNascimento" type="date"><small class="erro"></small></label>
+        <label>Sexo
+          <select name="sexo"><option value="">Selecione...</option><option>Feminino</option><option>Masculino</option><option>Outro</option></select>
+          <small class="erro"></small></label>
+        <label>Telefone <input name="telefone" placeholder="(00) 00000-0000" data-mascara="telefone"><small class="erro"></small></label>
+        <label class="inteira">Endereço Completo <input name="endereco" placeholder="Rua, número, bairro, cidade"><small class="erro"></small></label>
+        <div class="acoes inteira">
+          <button type="reset" class="btn">Cancelar</button>
+          <button class="btn primario">Cadastrar Paciente</button>
+        </div>
+      </form>
+
+      <div class="card sem-padding">
+        <div class="barra"><h3>Pacientes cadastrados</h3><input id="buscaPaciente" placeholder="Buscar por nome ou CPF"></div>
+        <table>
+          <thead><tr><th>Nome</th><th>CPF</th><th>Nascimento</th><th>Idade</th><th>Telefone</th><th class="direita">Ações</th></tr></thead>
+          <tbody id="tabelaPacientes"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== cadastro de medico (rf02, hu07) e disponibilidade (rf07) ========== -->
+    <section class="tela" id="tela-cadastro-medico">
+      <h2>Médicos</h2>
+      <p class="sub">Cadastro de médicos e consulta de quem está disponível agora.</p>
+      <form id="formMedico" class="card grade" novalidate data-perfis="RECEPCIONISTA ADMINISTRADOR">
+        <h3 class="inteira">Cadastro de Médico</h3>
+        <label class="inteira">Nome Completo * <input name="nome" placeholder="Nome do médico"><small class="erro"></small></label>
+        <label>CRM * <input name="crm" placeholder="CRM-GO 00000"><small class="erro"></small></label>
+        <label>Especialidade * <input name="especialidade" placeholder="Ex: Clínica Geral"><small class="erro"></small></label>
+        <label class="inteira">Status de Disponibilidade *
+          <select name="disponivel"><option value="">Selecione...</option><option value="true">Disponível</option><option value="false">Indisponível</option></select>
+          <small class="erro"></small></label>
+        <label>Usuário de acesso (opcional) <input name="login" placeholder="Para o médico entrar no sistema"><small class="erro"></small></label>
+        <label>Senha (opcional) <input name="senha" type="password" placeholder="Mínimo 6 caracteres"><small class="erro"></small></label>
+        <div class="acoes inteira">
+          <button type="reset" class="btn">Cancelar</button>
+          <button class="btn primario">Cadastrar</button>
+        </div>
+      </form>
+
+      <div class="card sem-padding">
+        <div class="barra"><h3>Médicos cadastrados</h3>
+          <label class="check"><input type="checkbox" id="soDisponiveis"> Somente disponíveis</label></div>
+        <table>
+          <thead><tr><th>Nome</th><th>CRM</th><th>Especialidade</th><th>Status</th><th class="direita">Ações</th></tr></thead>
+          <tbody id="tabelaMedicos"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== triagem (rf03, hu02) ========== -->
+    <section class="tela" id="tela-triagem">
+      <h2>Triagem</h2>
+      <p class="sub">Registre os sintomas do paciente e classifique o nível de gravidade.</p>
+      <form id="formTriagem" class="card triagem" novalidate>
+        <div>
+          <label>Paciente *
+            <select name="pacienteId" id="selectPaciente"><option value="">Selecione o paciente...</option></select>
+            <small class="erro"></small></label>
+          <label>Sintomas e Observações *
+            <textarea name="sintomas" rows="8" placeholder="Descreva detalhadamente os sintomas relatados pelo paciente, sinais vitais e outras observações clínicas..."></textarea>
+            <small class="erro"></small></label>
+          <label>Médico responsável (opcional)
+            <select name="medicoId" id="selectMedico"><option value="">Definir quando o médico chamar</option></select></label>
+        </div>
+        <div class="lado-gravidade">
+          <b>Nível de Gravidade *</b>
+          <label class="radio g-EMERGENCIA"><input type="radio" name="gravidade" value="EMERGENCIA"> Emergência</label>
+          <label class="radio g-MUITO_URGENTE"><input type="radio" name="gravidade" value="MUITO_URGENTE"> Muito Urgente</label>
+          <label class="radio g-URGENTE"><input type="radio" name="gravidade" value="URGENTE"> Urgente</label>
+          <label class="radio g-POUCO_URGENTE"><input type="radio" name="gravidade" value="POUCO_URGENTE"> Pouco Urgente</label>
+          <label class="radio g-NAO_URGENTE"><input type="radio" name="gravidade" value="NAO_URGENTE"> Não Urgente</label>
+          <small class="erro" data-campo="gravidade"></small>
+          <button class="btn primario largo">Salvar Ficha</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ========== historico do paciente (rf05, hu04) ========== -->
+    <section class="tela" id="tela-historico">
+      <h2>Histórico do Paciente</h2>
+      <p class="sub">Consulte os registros médicos e consultas anteriores.</p>
+      <div class="card barra">
+        <select id="selectHistorico"><option value="">Escolha um paciente...</option></select>
+      </div>
+      <div id="historicoConteudo"></div>
+    </section>
+
+    <!-- ========== atendimento (medico finaliza a consulta) ========== -->
+    <section class="tela" id="tela-atendimento">
+      <h2>Atendimento</h2>
+      <p class="sub">Leia a ficha de triagem e registre a consulta. Ao finalizar, ela vai para o histórico do paciente.</p>
+      <div id="atendimentoFicha" class="card"></div>
+      <form id="formAtendimento" class="card grade" novalidate>
+        <label class="inteira">Diagnóstico * <input name="diagnostico" placeholder="Ex: Infecção respiratória superior"><small class="erro"></small></label>
+        <label class="inteira">Observações <textarea name="observacoes" rows="3"></textarea></label>
+        <label class="inteira">Prescrição <textarea name="prescricao" rows="3"></textarea></label>
+        <div class="acoes inteira">
+          <button type="button" id="btnCancelarAtendimento" class="btn perigo">Cancelar atendimento</button>
+          <button class="btn primario">Finalizar e salvar no histórico</button>
+        </div>
+      </form>
+    </section>
+
+    <!-- ========== usuarios / funcionarios (so o administrador) ========== -->
+    <section class="tela" id="tela-usuarios">
+      <h2>Usuários</h2>
+      <p class="sub">Cadastro dos funcionários do sistema. O administrador é um usuário como os outros, só que com o perfil Administrador. Pacientes ficam na tela de cadastro de paciente e não têm login.</p>
+      <form id="formUsuario" class="card grade" novalidate>
+        <h3 class="inteira" id="tituloFormUsuario">Novo usuário</h3>
+        <label class="inteira">Nome Completo * <input name="nome" placeholder="Nome do funcionário"><small class="erro"></small></label>
+        <label>Usuário de acesso * <input name="login" placeholder="login para entrar no sistema" autocomplete="off"><small class="erro"></small></label>
+        <label id="campoSenha">Senha * <input name="senha" type="password" placeholder="Mínimo 6 caracteres" autocomplete="new-password"><small class="erro"></small></label>
+        <label class="inteira">Perfil *
+          <select name="perfil">
+            <option value="">Selecione...</option>
+            <option value="ADMINISTRADOR">Administrador</option>
+            <option value="RECEPCIONISTA">Recepcionista</option>
+            <option value="ENFERMEIRO">Enfermeiro(a)</option>
+            <option value="MEDICO">Médico(a)</option>
+          </select>
+          <small class="erro"></small></label>
+        <div id="camposAdmin" class="inteira" hidden>
+          <label>Nível de acesso <input name="nivelAcesso" placeholder="TOTAL (padrão)"><small class="erro"></small></label>
+        </div>
+        <div id="camposRecep" class="inteira" hidden>
+          <label>Matrícula <input name="matricula" placeholder="Opcional"><small class="erro"></small></label>
+        </div>
+        <div id="camposEnf" class="inteira" hidden>
+          <label>COREN <input name="coren" placeholder="Opcional"><small class="erro"></small></label>
+        </div>
+        <div id="camposMedico" class="inteira" hidden>
+          <label id="vincularMedico">Vincular a um médico já cadastrado (sem acesso)
+            <select name="medicoId" id="selectMedicoSemAcesso"><option value="">Cadastrar novo médico</option></select>
+            <small class="erro"></small></label>
+          <div id="dadosNovoMedico" class="grade" style="margin-top:8px">
+            <label>CRM * <input name="crm" placeholder="CRM-GO 00000"><small class="erro"></small></label>
+            <label>Especialidade * <input name="especialidade" placeholder="Ex: Clínica Geral"><small class="erro"></small></label>
+            <label>Disponibilidade
+              <select name="disponivel"><option value="true">Disponível</option><option value="false">Indisponível</option></select>
+              <small class="erro"></small></label>
+          </div>
+        </div>
+        <div class="acoes inteira">
+          <button type="reset" class="btn" id="btnCancelarUsuario">Cancelar</button>
+          <button class="btn primario" id="btnSalvarUsuario">Cadastrar usuário</button>
+        </div>
+      </form>
+
+      <div class="card sem-padding">
+        <div class="barra"><h3>Funcionários cadastrados</h3></div>
+        <table>
+          <thead><tr><th>Nome</th><th>Usuário</th><th>Perfil</th><th>Situação</th><th class="direita">Ações</th></tr></thead>
+          <tbody id="tabelaUsuarios"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- ========== relatorios (rf08, hu05) ========== -->
+    <section class="tela" id="tela-relatorios">
+      <h2>Relatórios</h2>
+      <p class="sub">Quantidade de atendimentos realizados em um período e tempo médio de espera por gravidade.</p>
+      <form id="formRelatorio" class="card barra">
+        <label>De <input type="date" name="inicio"></label>
+        <label>Até <input type="date" name="fim"></label>
+        <button class="btn primario">Gerar relatório</button>
+        <button type="button" id="btnPdf" class="btn">Exportar PDF</button>
+      </form>
+      <div id="relatorioConteudo"></div>
+    </section>
+  </main>
+</div>
+
+<script src="js/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,48 @@
+HEALTHCARE - Sistema de Controle de Triagem Hospitalar
+Projeto de Software I - ADS4 - SENAI Fatesg
+
+O QUE PRECISA
+- Windows 10 ou 11 com o Docker Desktop instalado (https://www.docker.com/products/docker-desktop/).
+  E o unico programa necessario: o Java, o Maven e o PostgreSQL rodam dentro do Docker.
+- Internet na primeira vez (para baixar as imagens). Depois funciona sem internet.
+
+COMO LIGAR
+1. De dois cliques em INICIAR.bat.
+2. Ele liga o Docker Desktop se estiver desligado, sobe o banco PostgreSQL e o sistema,
+   espera ficar pronto e abre o navegador em http://localhost:8088
+   (na primeira vez demora de 3 a 10 minutos, depois uns 20 segundos).
+3. A janela preta que fica aberta e um painel com opcoes: abrir o sistema, ver status,
+   ver log, reiniciar, zerar o banco, abrir o banco (psql) e parar tudo.
+
+COMO DESLIGAR
+- De dois cliques em PARAR.bat (ou opcao 7 do painel).
+  Ele para o sistema e o banco. Os dados ficam salvos para a proxima vez.
+
+LOGINS DE TESTE (usuario / senha)
+- admin / admin123            Administrador: relatorios, cadastro de usuarios e acesso a todas as telas
+- recepcao / recepcao123      Recepcionista: cadastro de pacientes e de medicos
+- enfermeiro / enfermeiro123  Enfermeiro: triagem
+- medico / medico123          Medica (Dra. Helena Rocha): fila, atendimento e historico
+- medico2 / medico123         Medico (Dr. Rafael Lima)
+
+O banco ja comeca com pacientes, medicos, uma fila e um historico de demonstracao.
+As tabelas e esses dados sao criados sozinhos na primeira vez que o sistema sobe.
+
+O administrador cadastra, edita, desativa e reativa funcionarios na tela Usuarios
+(incluindo outros administradores). O admin e um usuario comum, so que com o perfil
+Administrador. Quando o perfil e Medico, da para criar o medico junto ou vincular
+o login a um medico que ja estava cadastrado sem acesso. Pacientes continuam
+separados e nao tem login. Usuario desativado nao entra no sistema.
+
+ENDERECOS E PORTAS
+- Sistema: http://localhost:8088
+- Banco PostgreSQL: localhost porta 5433, banco healthcare, usuario healthcare, senha healthcare123
+
+PASTAS
+- codigo/            codigo fonte (Java com Spring Boot, telas em HTML, CSS e JavaScript)
+- docker-compose.yml liga o banco e o sistema juntos
+
+PROBLEMAS COMUNS
+- "Docker Desktop nao encontrado": instale o Docker Desktop, abra uma vez e rode o INICIAR.bat de novo.
+- "Porta 8088 em uso": feche o outro programa que usa essa porta.
+- Quer recomecar do zero: opcao 5 do painel (apaga os dados e volta aos dados de demonstracao).
