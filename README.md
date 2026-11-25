@@ -32,3 +32,17 @@ Sistema web de triagem hospitalar (**HealthCare**) desenvolvido em Java 17 (Spri
 │   └── 05-grafana-tempo.png
 ├── Dockerfile
 └── README.md
+
+
+## Testes Automatizados (Avaliação N2 - Teste de Software)
+
+Os testes automatizados foram implementados em Java 17 utilizando **JUnit 5**, **Mockito** e **Spring MockMvc** na classe `HealthCare/codigo/src/test/java/br/senai/healthcare/AvaliacaoN2Test.java`.
+
+### Pré-requisitos
+* **Java JDK 17+**
+* **Apache Maven 3.8+** (ou Maven Wrapper)
+
+### Como executar os testes
+1. Acesse a pasta do código-fonte Java:
+   ```bash
+   cd HealthCare/codigo
